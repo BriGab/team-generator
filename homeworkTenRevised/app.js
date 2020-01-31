@@ -9,11 +9,8 @@ const outputPath = path.resolve(__dirname, "output", "team.html");
 
 const render = require("./lib/htmlRenderer");
 
-const internPosition = [];
+const teamMembers = [];
 
-const managerPosition = [];
-
-const engineerPosition = [];
 
 createTeam ();
 function createTeam () {
@@ -40,7 +37,8 @@ inquirer.prompt ([
         choices: [
             "Intern",
             "Manager",
-            "Engineer"
+            "Engineer",
+            "exit"
         ]
     }
 ]).then(function(answer){
@@ -56,8 +54,33 @@ inquirer.prompt ([
         case "Engineer":
         getEngineer(answer);
         break;
+
+        case "Exit":
+
+        default:
+        buildTeam();
     }
 })
+}
+
+function createMore(){
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "What would you like to do next: ",
+            name: "next",
+            choices: [
+                "Create another team member",
+                "Build team "
+            ]
+        }
+    ]).then(function(answer){
+        if (answer.next === "Create another team member"){
+            createTeam();
+        } else {
+            buildTeam();
+        }
+    })
 }
 
 function getIntern(answer){
@@ -69,11 +92,9 @@ function getIntern(answer){
         }
     ]).then(function(school){
         const intern = new Intern(answer.name, answer.id, answer.email, school.school)
-        internPosition.push(intern)
-        for (let i=0; i < internPosition.length; i++) {
-        console.log(internPosition)
-        }
-        createTeam();
+        teamMembers.push(intern)
+        console.log(school.school)
+        createMore();
         
     })
 
@@ -88,10 +109,10 @@ function getManager(answer) {
         }
     ]).then(function(officeNumber){
         const manager = new Manager(answer.name, answer.id, answer.email, officeNumber.officeNumber)
-        managerPosition.push(manager)
+        teamMembers.push(manager)
         console.log(officeNumber)
-        console.log(manager)
-        createTeam();
+        console.log(teamMembers)
+        createMore();
     })
 
 }
@@ -105,10 +126,14 @@ function getEngineer(answer){
         }
     ]).then(function(github){
         const engineer = new Engineer(answer.name, answer.id,answer.email, github.github)
-        engineerPosition.push(engineer)
+        teamMembers.push(engineer)
         console.log(github)
         console.log(engineer)
-        console.log(engineerPosition)
-        createTeam();
+        console.log(teamMembers)
+        createMore();
     })
 }
+
+function buildTeam() {
+    fs.writeFileSync(outputPath, render(teamMembers))
+};
